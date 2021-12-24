@@ -1,0 +1,402 @@
+Полезные фрагменты или 30 секунд кода на Python
+
+В этой статье вы найдете полезные фрагменты кода на Python, которые сможете понять менее чем за 30 секунд и применять на практике.
+
+
+Списки
+1) Chunk
+Разбиение массива на меньшие списки указанного размера. Для создания списка желаемого размера используется range, а заполняется список при помощи map.
+
+from math import ceil
+
+
+def chunk(arr, size):
+    return list(
+        map(lambda x: arr[x * size:x * size + size],
+            list(range(0, ceil(len(arr) / size)))))
+Пример:
+
+chunk ([1,2,3,4,5],2) # [[1,2],[3,4],5]
+
+
+2) Compact
+Удаление ложных значений (False, None, 0, и "") из списка при помощи filter().
+
+def compact(arr):
+    return list(filter(lambda x: bool(x), arr))
+Пример:
+
+compact([0, 1, False, 2, '', 3, 'a', 's', 34]) # [ 1, 2, 3, 'a', 's', 34 ]
+
+
+3) Count_by
+Этот кусок кода на Python группирует элементы списка и возвращает количество элементов в каждой группе.
+
+Используется map() для сопоставления значений списка со значениями функции. За каждую итерацию счетчик увеличивается.
+
+def count_by(arr, fn=lambda x: x):
+    key = {}
+    for el in map(fn, arr):
+        key[el] = 0 if el not in key else key[el]
+        key[el] += 1
+    return key
+Пример:
+
+from math import floor
+count_by([6.1, 4.2, 6.3], floor) # {4: 1, 6: 2}
+count_by(['one', 'two', 'three'], len) # {3: 2, 5: 1}
+
+
+
+4) Сount_occurences
+Считает количество повторений заданного значения.
+
+Используется функция reduce из встроенных модулей functools для увеличения счетчика каждый раз, когда вы сталкиваетесь с определенным значением внутри списка.
+
+from functools import reduce
+
+
+def count_occurences(arr, val):
+    return reduce(
+        (lambda x, y: x + 1 if y == val and type(y) == type(val) else x + 0),
+        arr)
+Пример:
+
+count_occurrences([1, 1, 2, 1, 2, 3], 1) # 3
+
+
+
+5) deep_flatten
+Выравнивание списка при помощи рекурсии. Используется list.extend() вместе с пустым массивом (result) и функция spread для сглаживания каждого элемента списка.
+
+def spread(arg):
+    ret = []
+    for i in arg:
+        if isinstance(i, list):
+            ret.extend(i)
+        else:
+            ret.append(i)
+    return ret
+
+
+def deep_flatten(arr):
+    result = []
+    result.extend(
+        spread(list(map(lambda x: deep_flatten(x) if type(x) == list else x, arr))))
+    return result
+Пример:
+
+deep_flatten([1, [2], [[3], 4], 5]) # [1,2,3,4,5]
+
+
+
+
+6) difference
+Возвращает разницу между двумя массивами. Создает set из b и сохраняет только те значения, которые не содержатся в b.
+
+def difference(a, b):
+    b = set(b)
+    return [item for item in a if item not in b]
+Пример:
+
+difference([1, 2, 3], [1, 2, 4]) # [3]
+
+
+
+
+7) difference_by
+Возвращает разницу между двумя списками, после применения функции к обоим спискам. Создает set, применяя fn к каждому элементу в b, затем использует сочетание fn и a, чтобы сохранить только значения, не содержащиеся в ранее созданном set.
+
+def difference_by(a, b, fn):
+    b = set(map(fn, b))
+    return [item for item in a if fn(item) not in b]
+Пример:
+
+from math import floor
+difference_by([2.1, 1.2], [2.3, 3.4],floor) # [1.2]
+difference_by([{ 'x': 2 }, { 'x': 1 }], [{ 'x': 1 }], lambda v : v['x']) # [ { x: 2 } ]
+
+
+
+8) insertion_sort
+На самом базовом уровне алгоритм сортировки вставкой содержит логику смещения и вставки элементов для сортировки неупорядоченного списка любого размера. Способ, который реализует вставку элементов, делает сортировку очень интересной!
+
+def insertion_sort(arr):
+
+    for i in range(1, len(arr)):
+        key = arr[i]
+        j = i - 1
+        while j >= 0 and key < arr[j]:
+            arr[j + 1] = arr[j]
+            j -= 1
+            arr[j + 1] = key
+Пример:
+
+arr = [7,4,9,2,6,3]
+insertionsort(arr)
+print('Sorted %s'  %arr) # sorted [2, 3, 4, 6, 7, 9]
+
+
+
+
+9) shuffle
+Рандомизирует порядок значений списка, возвращая новый список. Использует алгоритм Фишера-Йейтса для изменения порядка элементов списка.
+
+from copy import deepcopy
+from random import randint
+
+
+def shuffle(arr):
+    temp_arr = deepcopy(arr)
+    m = len(temp_arr)
+    while (m):
+        m -= 1
+        i = randint(0, m)
+        temp_arr[m], temp_arr[i] = temp_arr[i], temp_arr[m]
+    return temp_arr
+Пример:
+
+foo = [1,2,3]
+shuffle(foo) # [2,3,1] , foo = [1,2,3]
+
+
+
+
+
+10) spread
+Заимствует [].concat(...arr) из Javascript. Сглаживает список (не глубоко) и возвращает новый список.
+
+def spread(arg):
+    ret = []
+    for i in arg:
+        if isinstance(i, list):
+            ret.extend(i)
+        else:
+            ret.append(i)
+    return ret
+Пример:
+
+spread([1,2,3,[4,5,6],[7],8,9]) # [1,2,3,4,5,6,7,8,9]
+
+
+
+
+
+11) zip
+Создает список элементов, группируя их на основании позиции в оригинальном списке. Используется max вместе с list comprehension для получения длины самого длинного списка в аргументах. В качестве длины lists используется значение fill_value. По умолчанию значение fill_value равно None.
+
+def zip(*args, fillvalue=None):
+    max_length = max([len(arr) for arr in args])
+    result = []
+    for i in range(max_length):
+        result.append([
+            args[k][i] if i < len(args[k]) else None for k in range(len(args))
+        ])
+    return result
+Пример:
+
+zip(['a', 'b'], [1, 2], [True, False]) # [['a', 1, True], ['b', 2, False]]
+zip(['a'], [1, 2], [True, False]) # [['a', 1, True], [None, 2, False]]
+zip(['a'], [1, 2], [True, False], fill_value = '_') # [['a', 1, True], ['_', 2, False]]
+Математика
+Продолжаем список фрагментов кода на Python реализацией некоторых математических функций.
+1) average
+Возвращает среднее от двух и более чисел. Происходит деление на len(args) суммы всех элементов args. Второй аргумент 0.0 используется для операций с плавающей точкой в python2.
+
+def average(*args):
+    return sum(args, 0.0) / len(args)
+Пример:
+
+average(*[1, 2, 3]) # 2.0
+average(1, 2, 3) # 2.0
+2) factorial
+Вычисляется факториал числа.
+
+Используется рекурсия. Если num меньше или равно 1, возвращается 1, а иначе – произведение num и factorial из num - 1. Сработает исключение, если num будет отрицательным или числом с плавающей точкой.
+
+def factorial(num):
+    if not ((num >= 0) & (num % 1 == 0)):
+        raise Exception(
+            f"Number( {num} ) can't be floating point or negative ")
+    return 1 if num == 0 else num * factorial(num - 1)
+Пример:
+
+factorial(6) # 720
+3) gcd
+Вычисляется наибольший общий делитель между двумя или более числами / списками.
+
+В helperGcdfunction используется рекурсия. Базовый случай, когда y равно 0. В этом случае возвращается x. В противном случае возвращается y и остаток от деления x/y. Используется reduce из встроенного модуля functools.
+
+from functools import reduce
+
+
+def spread(arg):
+    ret = []
+    for i in arg:
+        if isinstance(i, list):
+            ret.extend(i)
+        else:
+            ret.append(i)
+    return ret
+
+
+def gcd(*args):
+    numbers = []
+    numbers.extend(spread(list(args)))
+
+    def _gcd(x, y):
+        return x if not y else gcd(y, x % y)
+
+    return reduce((lambda x, y: _gcd(x, y)), numbers)
+Пример:
+
+gcd(8,36) # 4
+4) lcm
+Возвращает наименьшее общее кратное из двух или более чисел. Используется формула greatest common divisor (GCD) и lcm(x,y) = x * y / gcd(x,y) для определения наименьшего общего кратного. Формула GCD использует рекурсию, а также reduce из встроенного модуля functools.
+
+from functools import reduce
+
+
+def spread(arg):
+    ret = []
+    for i in arg:
+        if isinstance(i, list):
+            ret.extend(i)
+        else:
+            ret.append(i)
+    return ret
+
+
+def lcm(*args):
+    numbers = []
+    numbers.extend(spread(list(args)))
+
+    def _gcd(x, y):
+        return x if not y else _gcd(y, x % y)
+
+    def _lcm(x, y):
+        return x * y / _gcd(x, y)
+
+    return reduce((lambda x, y: _lcm(x, y)), numbers)
+Пример:
+
+lcm(12, 7) # 84
+lcm([1, 3, 4], 5) # 60
+5) max_n
+Возвращает n максимальных элементов из списка. Если n больше или равно длине списка, возвращается исходный список, отсортированный в порядке убывания.
+
+Используется list.sort() в сочетании с функцией deepcopy из встроенного модуля copy, чтобы создать клон списка и отсортировать его в порядке возрастания, а затем list.reverse(), чтобы отсортировать по убыванию. Для получения указанного количества элементов используется [:n]. Второй аргумент n опускается, чтобы получить одноэлементный массив.
+
+from copy import deepcopy
+
+
+def max_n(arr, n=1):
+    numbers = deepcopy(arr)
+    numbers.sort()
+    numbers.reverse()
+    return numbers[:n]
+Пример:
+
+max_n([1, 2, 3]) # [3]
+max_n([1, 2, 3], 2) # [3,2]
+6) min_n
+Возвращает n минимальных элементов из списка. Если n больше или равно длине списка, возвращается исходный список, отсортированный в порядке возрастания.
+
+Используется list.sort() в сочетании с функцией deepcopy из встроенного модуля copy, чтобы создать клон списка и отсортировать его в порядке возрастания, а затем list.reverse(), чтобы отсортировать по убыванию. Для получения указанного количества элементов используется [:n]. Второй аргумент n опускается, чтобы получить одноэлементный массив.
+
+from copy import deepcopy
+
+def min_n(arr, n=1):
+    numbers = deepcopy(arr)
+    numbers.sort()
+    return numbers[:n]
+Пример:
+
+min_n([1, 2, 3]) # [1]
+min_n([1, 2, 3], 2) # [1,2]
+Строки
+Последние фрагменты кода на Python на тему работы со строками.
+1) byte_size
+Возвращает длину строки в байтах. Заданная строка кодируется utf-8, а потом находится ее длина.
+
+def byte_size(string):
+    return(len(string.encode('utf-8')))
+Пример:
+
+byte_size('?') # 4
+byte_size('Hello World') # 11
+2) capitalize
+Делает первую букву строки заглавной.
+
+Делает первую букву строки заглавной, а затем добавляет ее к остальной части строки. Параметр lower_rest опускается, чтобы сохранить остальную часть строки нетронутой, или для нее устанавливается значение true, чтобы преобразовать в нижний регистр.
+
+def capitalize(string, lower_rest=False):
+    return string[:1].upper() + (string[1:].lower() if lower_rest else string[1:])
+Пример:
+
+capitalize('fooBar') # 'FooBar'
+capitalize('fooBar', True) # 'Foobar'
+3) capitalize_every_word
+Делает первую букву заглавной каждого слова строки. Используется str.title.
+
+def capitalize_every_word(string):
+    return string.title()
+Пример:
+
+capitalize_every_word('hello world!') # 'Hello World!'
+4) count_vowels
+Возвращает number гласных в string. При помощи регулярного выражения, вычисляется количество гласных (A, E, I, O, U) в строке.
+
+import re
+
+def count_vowels(str):
+    return len(len(re.findall(r'[aeiou]', str, re.IGNORECASE)))
+Пример:
+
+count_vowels('foobar') # 3
+count_vowels('gym') # 0
+5) decapitalize
+Делает первую букву строки строчной, а затем добавляет ее к остальной части строки. Параметр upper_rest опускается, чтобы сохранить остальную часть строки нетронутой, или для нее устанавливается значение true, чтобы преобразовать в верхний регистр.
+
+def decapitalize(string, upper_rest=False):
+    return str[:1].lower() + (str[1:].upper() if upper_rest else str[1:])
+Пример:
+
+decapitalize('FooBar') # 'fooBar'
+decapitalize('FooBar', True) # 'fOOBAR'
+6) is_lower_case
+Преобразует строку в верхний регистр при помощи метода str.lower() и сравнивает ее с оригиналом.
+
+def is_lower_case(str):
+    return str == str.lower()
+Пример:
+
+is_lower_case('abc') # True
+is_lower_case('a3@$') # True
+is_lower_case('Ab4') # False
+7) is_upper_case
+Преобразует строку в нижний регистр при помощи метода str.upper() и сравнивает ее с оригиналом.
+
+def is_upper_case(str):
+    return str == str.upper()
+Пример:
+
+is_upper_case('ABC') # True
+is_upper_case('a3@$') # True
+is_upper_case('aB4') # False
+8) palindrome
+Возвращает True если строка является палиндромом, иначе False.
+
+Преобразует строку str.lower() и использует re.sub  для удаления не алфавитно-цифровых символов. Потом сравнивает новую строку с реверсивной строкой.
+
+def palindrome(string):
+    from re import sub
+    s = sub('[\W_]', '', string.lower())
+    return s == s[::-1]
+Пример:
+
+palindrome('taco cat') # True
+
+
+Проверка изменений
+https://github.com/30-seconds/30-seconds-of-python
